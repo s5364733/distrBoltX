@@ -1,4 +1,4 @@
-module github.com/distrD/boltX
+module github.com/s5364733/distrBoltX
 
 go 1.17
 

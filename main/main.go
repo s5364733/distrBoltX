@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/distrD/boltX/db"
-	"github.com/distrD/boltX/web"
+	db "github.com/s5364733/distrBoltX"
+	"github.com/s5364733/distrBoltX/web"
 	"log"
 	"net/http"
 )
