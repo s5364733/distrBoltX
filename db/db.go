@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"github.com/boltdb/bolt"
+	bolt "go.etcd.io/bbolt"
 	"log"
 )
 
