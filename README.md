@@ -4,6 +4,7 @@ Handwriting based on boltDB distributed KV database, the library will be updated
 > go mod tidy 
 # Start to up
 > go mod install; main -db-location=distBoltX.db
+
 # Supporting a simple data sharding,which the server sharding is being accessed
 ```toml
 [[shards]]
@@ -34,3 +35,4 @@ Since Bolt is meant to be used as such a low-level piece of functionality, simpl
 DistrBoltX is secondary developed based on bbolt, adding distributed fragmentation high availability data security and other scenarios
 
 There will be a lot of optimization details in the future, so stay tuned
+

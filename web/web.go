@@ -3,7 +3,7 @@ package web
 //jack.lei
 import (
 	"fmt"
-	db "github.com/s5364733/distrBoltX"
+	"github.com/s5364733/distrBoltX/db"
 	"hash/fnv"
 	"io"
 	"net/http"
