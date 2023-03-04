@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"github.com/BurntSushi/toml"
 	"github.com/s5364733/distrBoltX/config"
 	"github.com/s5364733/distrBoltX/db"
 	"github.com/s5364733/distrBoltX/web"
@@ -33,28 +31,16 @@ func main() {
 	// It will be created if it doesn't exist.
 	parseFlag()
 
-	var c config.Config
-	if _, err := toml.DecodeFile(*configFile, &c); err != nil {
-		log.Fatalf("Toml.DecodeFile(%q): %v", *configFile, err)
+	c, err := config.ParseConfig(*configFile)
+	if err != nil {
+		log.Fatalf("Error parsing config %q: %v", *configFile, err)
 	}
 
-	//var shardCount int
-	var shardIdx = -1
-	var addrs = make(map[int]string)
-	//扫描所有shard,
-	for _, s := range c.Shards {
-		addrs[s.Idx] = s.Address
-		if s.Name == *shard {
-			shardIdx = s.Idx
-		}
+	shards, err := config.ParseShards(c.Shards, *shard)
+	if err != nil {
+		log.Fatalf("Error parsing shards config :%v", err)
 	}
-
-	if shardIdx < 0 {
-		log.Fatalf("Shard %q was not found", *shard)
-	}
-
-	log.Printf("Shard count is %d current config :%d", len(c.Shards), shardIdx)
-	fmt.Printf("%#v", &c)
+	log.Printf("Shard count is %d current config :%d cur config %#v:", len(c.Shards), shards.CurIdx, &c)
 
 	db, close, err := db.NewDatabase(*dbLocation)
 	if err != nil {
@@ -63,9 +49,25 @@ func main() {
 
 	defer close()
 	//shard0 shard1 shard2 分别放在三个数据库
-	srv := web.NewServer(db, shardIdx, len(c.Shards), addrs)
+	srv := web.NewServer(db, shards)
 	http.HandleFunc("/set", srv.SetHandler)
 	http.HandleFunc("/get", srv.GetHandler)
+	http.HandleFunc("/purge", srv.DeleteExtraKeyHandler)
 
 	srv.ListenAndServe(*httpAddr)
 }
+
+////var shardCount int
+//var shardIdx = -1
+//var addrs = make(map[int]string)
+////扫描所有shard,
+//for _, s := range c.Shards {
+//	addrs[s.Idx] = s.Address
+//	if s.Name == *shard {
+//		shardIdx = s.Idx
+//	}
+//}
+//
+//if shardIdx < 0 {
+//	log.Fatalf("Shard %q was not found", *shard)
+//}
