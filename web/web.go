@@ -2,9 +2,11 @@ package web
 
 //jack.lei
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/s5364733/distrBoltX/config"
 	"github.com/s5364733/distrBoltX/db"
+	"github.com/s5364733/distrBoltX/replication"
 	"io"
 	"net/http"
 )
@@ -69,7 +71,7 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	key := r.Form.Get("key")
 	value := r.Form.Get("value")
 	err := s.db.SetKey(key, []byte(value))
-	shard := s.shards.Index("key")
+	shard := s.shards.Index(key)
 
 	if shard != s.shards.CurIdx {
 		s.redirect(shard, w, r)
@@ -89,4 +91,31 @@ func (s *Server) DeleteExtraKeyHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Error  = %v", s.db.DeleteExtraKeys(func(key string) bool {
 		return s.shards.CurIdx != s.shards.Index(key)
 	}))
+}
+
+// GetNextKeyForReplication returns the next key for replication.
+func (s *Server) GetNextKeyForReplication(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	k, v, err := s.db.GetNextKeyForReplication()
+	enc.Encode(&replication.NextKeyValue{
+		Key:   string(k),
+		Value: string(v),
+		Err:   err,
+	})
+}
+
+// DeleteReplicationKey deletes the key from replica queue.
+func (s *Server) DeleteReplicationKey(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	key := r.Form.Get("key")
+	value := r.Form.Get("value")
+
+	err := s.db.DeleteReplicationKey([]byte(key), []byte(value))
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		fmt.Fprintf(w, "error: %v", err)
+		return
+	}
+
+	fmt.Fprintf(w, "ok")
 }

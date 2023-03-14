@@ -1,14 +1,23 @@
 [[shards]]
 name = "shard0"
 idx  = 0
-address = "localhost:8080"
+address = "127.0.0.2:8080"
+replicas = ["127.0.0.22:8080"]
 
 [[shards]]
 name = "shard1"
 idx  = 1
-address = "localhost:8081"
+address = "127.0.0.3:8081"
+replicas = ["127.0.0.33:8080"]
 
 [[shards]]
 name = "shard2"
 idx  = 2
-address = "localhost:8082"
+address = "127.0.0.4:8082"
+replicas = ["127.0.0.44:8080"]
+
+[[shards]]
+name = "shard3"
+idx = 3
+address = "127.0.0.5:8080"
+replicas = ["127.0.0.55:8080"]
