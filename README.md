@@ -1,6 +1,6 @@
 # distrBoltX
 Handwriting based on boltDB distributed KV database, the library will be updated from time to time, suitable for small white scholars entry and distributed advanced
->该库是基于 **io/etcd.bbolt** 驱动打造一个分布式KV库(Bbolt有点类似innodb 完全兼容ACID事务)，新能完全取决于Bbolt的B+tree的顺序写，和NMAP的预随机读，因为是基于硬盘的读写驱动，所以在固态硬盘上运行的性能最佳
+>该库是基于 **io/etcd.bbolt** 驱动打造一个分布式KV库(Bbolt有点类似innodb 完全兼容ACID事务)，新能完全取决于Bbolt的B+tree的顺序写，和MMAP的预随机读，因为是基于硬盘的读写驱动，所以在固态硬盘上运行的性能最佳
 # Prepare the dependency library
 > go mod tidy 
 # Standalone Start to up
