@@ -13,7 +13,7 @@ import (
 
 // Server contains  HTTP method handler to be used for  the database
 type Server struct {
-	db *db.Database
+	Db *db.Database
 	//shardIdx   int
 	//shardCount int
 	//addr       map[int]string
@@ -23,7 +23,7 @@ type Server struct {
 // NewServer for used to be http endpoint handler
 func NewServer(db *db.Database, s *config.Shards) *Server {
 	return &Server{
-		db:     db,
+		Db:     db,
 		shards: s,
 	}
 }
@@ -31,7 +31,7 @@ func NewServer(db *db.Database, s *config.Shards) *Server {
 func (s *Server) redirect(shard int, w http.ResponseWriter, r *http.Request) {
 	url := "http://" + s.shards.Addrs[shard] + r.RequestURI
 	resp, err := http.Get(url)
-	fmt.Fprintf(w, "redirect from config %d to  config %d(%q)\n", s.shards.CurIdx, shard, url)
+	fmt.Fprintf(w, "redirect from shard %d to  shard %d(%q)\n", s.shards.CurIdx, shard, url)
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Error's redirect request url: %v", err)
@@ -48,7 +48,6 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	key := r.Form.Get("key")
 	shard := s.shards.Index(key)
-	value, err := s.db.GetKey(key)
 
 	//当前有可能不是拿的当前分区的数据,例如当前key计算出来的HASH取模分片之后为0 但是请求的是1分区的库，
 	//所以这里导航到0分区即可
@@ -56,7 +55,7 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 		s.redirect(shard, w, r)
 		return
 	}
-
+	value, err := s.Db.GetKey(key)
 	fmt.Fprintf(w, "ShardIdx: %d , cur config :%d ,addr : %q , value = %q ,error=%v ",
 		shard,                 //KEY 对应的分片路由ID
 		s.shards.CurIdx,       //当前分区
@@ -70,15 +69,14 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	key := r.Form.Get("key")
 	value := r.Form.Get("value")
-	err := s.db.SetKey(key, []byte(value))
 	shard := s.shards.Index(key)
 
 	if shard != s.shards.CurIdx {
 		s.redirect(shard, w, r)
 		return
 	}
-
-	fmt.Fprintf(w, "Error=%v, shardIdx %d , current config: %d", err, shard, s.shards.CurIdx)
+	err := s.Db.SetKey(key, []byte(value))
+	fmt.Fprintf(w, "Error=%v, shardIdx %d , current shard: %d", err, shard, s.shards.CurIdx)
 }
 
 // ListenAndServe starts accept request
@@ -88,7 +86,7 @@ func (s *Server) ListenAndServe(addr string) error {
 
 // DeleteExtraKeyHandler deletes keys that don't belong to current shard
 func (s *Server) DeleteExtraKeyHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Error  = %v", s.db.DeleteExtraKeys(func(key string) bool {
+	fmt.Fprintf(w, "Error  = %v", s.Db.DeleteExtraKeys(func(key string) bool {
 		return s.shards.CurIdx != s.shards.Index(key)
 	}))
 }
@@ -96,7 +94,7 @@ func (s *Server) DeleteExtraKeyHandler(w http.ResponseWriter, r *http.Request) {
 // GetNextKeyForReplication returns the next key for replication.
 func (s *Server) GetNextKeyForReplication(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
-	k, v, err := s.db.GetNextKeyForReplication()
+	k, v, err := s.Db.GetNextKeyForReplication()
 	enc.Encode(&replication.NextKeyValue{
 		Key:   string(k),
 		Value: string(v),
@@ -104,13 +102,13 @@ func (s *Server) GetNextKeyForReplication(w http.ResponseWriter, r *http.Request
 	})
 }
 
-// DeleteReplicationKey deletes the key from replica queue.
+// DeleteReplicationKey deletes the key from replicas queue.
 func (s *Server) DeleteReplicationKey(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	key := r.Form.Get("key")
 	value := r.Form.Get("value")
 
-	err := s.db.DeleteReplicationKey([]byte(key), []byte(value))
+	err := s.Db.DeleteReplicationKey([]byte(key), []byte(value))
 	if err != nil {
 		w.WriteHeader(http.StatusExpectationFailed)
 		fmt.Fprintf(w, "error: %v", err)

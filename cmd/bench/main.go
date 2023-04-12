@@ -48,7 +48,7 @@ func benchmark(name string, iter int, fn func() string) (qps float64, strs []str
 	avg := time.Since(start) / time.Duration(iter)
 	//单个请求的QPS
 	qps = float64(iter) / (float64(time.Since(start)) / float64(time.Second))
-	fmt.Printf("Func %s took %s avg, %.1f QPS, %s max, %s min\n", name, avg, qps, max, min)
+	fmt.Printf("Func %s ,took %s avg, %.1f QPS, %s max, %s min\n", name, avg, qps, max, min)
 
 	return qps, strs
 }

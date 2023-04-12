@@ -1,0 +1,24 @@
+
+syntax = "proto3";
+
+option go_package = "github.com/s5364733/distrBoltX/work/workspace/distrBoltX/rpc";
+option java_multiple_files = true;
+option java_outer_classname = "NextKeyValueProto";
+
+package proto;
+
+// The AckSyncDialer service definition.
+service AckSyncDialer {
+  // Sends a ack
+  rpc dial (stream SyncD) returns (stream NextKeyValue) {}
+}
+//
+message NextKeyValue {
+    string key = 1;
+    string value = 2;
+
+}
+// sync flag for serve
+message SyncD {
+   bool ack = 1;
+}
