@@ -87,7 +87,7 @@ replicas = ["127.0.0.22:8080"]
 ```
 
 ##### 您可能会问,为什么我在本地可以监听127.0.0.2
-
+因为127.0.0.2是环回地址中的一个是可以使用的,您可以参考 https://superuser.com/questions/393700/what-is-the-127-0-0-2-ip-address-for
 #### CHANGELOG_FEATURE
 1. 内部连接使用GRPC代替HTTP1.1协议 (done)
 2. 取模分片算法采用一致性HASH算发代替用来解决HASH迁移的问题
