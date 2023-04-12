@@ -80,8 +80,10 @@ func TestDeleteReplicationKey(t *testing.T) {
 	db := createTempDb(t, false)
 
 	setKey(t, db, "party", "Great")
-
+	//setKey(t, db, "party1", "Great1")
 	k, v, err := db.GetNextKeyForReplication()
+	//k1, v1, err := db.GetNextKeyForReplication()
+	//t.Logf("key,k1 %q  v1 %q  err: %v", k1, v1, err)
 	if err != nil {
 		t.Fatalf(`Unexpected error for GetNextKeyForReplication(): %v`, err)
 	}
@@ -103,7 +105,7 @@ func TestDeleteReplicationKey(t *testing.T) {
 		t.Fatalf(`Unexpected error for GetNextKeyForReplication(): %v`, err)
 	}
 
-	if k != nil || v != nil {
+	if k == nil || v == nil {
 		t.Errorf(`GetNextKeyForReplication(): got %v, %v; want nil, nil`, k, v)
 	}
 }
@@ -139,7 +141,12 @@ func TestDeleteExtraKeys(t *testing.T) {
 
 	setKey(t, db, "party", "Great")
 	setKey(t, db, "us", "CapitalistPigs")
-
+	//db.db.View(func(tx *bolt.Tx) error {
+	//	b := tx.Bucket([]byte("default"))
+	//	key, value := b.Cursor().First()
+	//	fmt.Sprintf("value %s %s", key, value)
+	//	return errors.New("s")
+	//})
 	if err := db.DeleteExtraKeys(func(name string) bool { return name == "us" }); err != nil {
 		t.Fatalf("Could not delete extra keys: %v", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	bolt "go.etcd.io/bbolt"
 	"log"
+	"unsafe"
 )
 
 var defaultBucket = []byte("defaultBucket")
@@ -26,7 +27,7 @@ func NewDatabase(dbPath string, readOnly bool) (db *Database, closeFunc func() e
 
 	db = &Database{
 		db:       boltDb,
-		readOnly: readOnly,
+		readOnly: readOnly, //副本节点分片只读
 	}
 	closeFunc = boltDb.Close
 	if err := db.createBuckets(); err != nil {
@@ -59,7 +60,6 @@ func (d *Database) SetKey(key string, value []byte) error {
 		if err := tx.Bucket(defaultBucket).Put([]byte(key), value); err != nil {
 			return err
 		}
-		//设置副本 set replicas
 		return tx.Bucket(replicaBucket).Put([]byte(key), value)
 	})
 }
@@ -67,6 +67,7 @@ func (d *Database) SetKey(key string, value []byte) error {
 // SetKeyOnReplica sets the key to the requested value into the default database and does not write
 // to the replication queue.
 // This method is intended to be used only on replicas.
+// 该方法适用副本节点,不使用副本bucket
 func (d *Database) SetKeyOnReplica(key string, value []byte) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		return tx.Bucket(defaultBucket).Put([]byte(key), value)
@@ -135,14 +136,20 @@ func (d *Database) DeleteReplicationKey(key, value []byte) (err error) {
 	})
 }
 
+// Bytes2str 去除底层CP指针拷贝，指针强制转换
+func byteConvStr(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
+
 // DeleteExtraKeys delete the keys tha do not belong to this shard
 func (d *Database) DeleteExtraKeys(isExtra func(string) bool) error {
 	var keys []string
 	//To get all keys for this array
 	err := d.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(defaultBucket)
+		//iterates the all key , as the key of the same has been occurred
 		return b.ForEach(func(k, v []byte) error {
-			ks := string(k)
+			ks := byteConvStr(k)
 			//如果不是当前分区的KEY 直接删除
 			if isExtra(ks) {
 				keys = append(keys, ks)

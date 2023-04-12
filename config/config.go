@@ -79,10 +79,3 @@ func (s *Shards) Index(key string) int {
 	h.Write([]byte(key))
 	return int(h.Sum64() % uint64(s.Count))
 }
-
-//// GetShard Calculates the sum hash value  for the key
-//func (s *Server) GetShard(key string) int {
-//	n := fnv.New64()
-//	n.Write([]byte(key))
-//	return int(n.Sum64() % uint64(s.shards.Count))
-//}

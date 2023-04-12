@@ -19,5 +19,5 @@ replicas = ["127.0.0.44:8080"]
 [[shards]]
 name = "shard3"
 idx = 3
-address = "127.0.0.5:8080"
+address = "127.0.0.5:8083"
 replicas = ["127.0.0.55:8080"]
