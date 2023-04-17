@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/s5364733/distrBoltX/db"
-	rpc "github.com/s5364733/distrBoltX/rpc/proto"
+	"github.com/s5364733/distrBoltX/api"
+	"github.com/s5364733/distrBoltX/internal/db"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
@@ -68,7 +68,7 @@ func (c *client) grpcLoop() (err error) {
 		return err
 	}
 	defer conn.Close()
-	dialerClient := rpc.NewAckSyncDialerClient(conn)
+	dialerClient := api.NewAckSyncDialerClient(conn)
 	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	//defer cancel()
 	stream, err := dialerClient.Dial(context.TODO())
@@ -86,7 +86,7 @@ func (c *client) grpcLoop() (err error) {
 			}
 			//set to current replication
 			c.syncReplicationBolt(res)
-			err = stream.Send(&rpc.SyncD{
+			err = stream.Send(&api.SyncD{
 				Ack: true,
 			})
 			if err != nil {
@@ -102,7 +102,7 @@ func (c *client) grpcLoop() (err error) {
 	return nil
 }
 
-func (c *client) syncReplicationBolt(res *rpc.NextKeyValue) {
+func (c *client) syncReplicationBolt(res *api.NextKeyValue) {
 	//设置到当前节点
 	if err := c.db.SetKeyOnReplica(res.Key, []byte(res.Value)); err != nil {
 		fmt.Errorf("err for operation of sync , key = %q,value = %q, err = %+v", res.Key, res.Value, err)

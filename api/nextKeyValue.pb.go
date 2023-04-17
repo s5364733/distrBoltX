@@ -4,7 +4,7 @@
 // 	protoc        v4.22.2
 // source: nextKeyValue.proto
 
-package rpc
+package api
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

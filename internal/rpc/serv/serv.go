@@ -2,14 +2,14 @@ package serv
 
 import (
 	"fmt"
-	rpc "github.com/s5364733/distrBoltX/rpc/proto"
-	"github.com/s5364733/distrBoltX/web"
+	"github.com/s5364733/distrBoltX/api"
+	"github.com/s5364733/distrBoltX/internal/web"
 	"io"
 	"time"
 )
 
 type AckSyncDialerService struct {
-	rpc.UnimplementedAckSyncDialerServer
+	api.UnimplementedAckSyncDialerServer
 	s *web.Server
 }
 
@@ -19,7 +19,7 @@ func NewAckSyncDialerService(serv *web.Server) *AckSyncDialerService {
 	}
 }
 
-func (c *AckSyncDialerService) Dial(stream rpc.AckSyncDialer_DialServer) error {
+func (c *AckSyncDialerService) Dial(stream api.AckSyncDialer_DialServer) error {
 	for {
 		//1. 拿到最新KEY
 		key, v, err2 := c.s.Db.GetNextKeyForReplication()
@@ -28,7 +28,7 @@ func (c *AckSyncDialerService) Dial(stream rpc.AckSyncDialer_DialServer) error {
 			continue
 		}
 		//2.发送到副本数据同步到副本节点bucket
-		err2 = stream.Send(&rpc.NextKeyValue{
+		err2 = stream.Send(&api.NextKeyValue{
 			Key:   string(key),
 			Value: string(v),
 		})
