@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/s5364733/distrBoltX/config"
-	"github.com/s5364733/distrBoltX/db"
-	"github.com/s5364733/distrBoltX/replication"
+	"github.com/s5364733/distrBoltX/internal/db"
+	"github.com/s5364733/distrBoltX/pkg/replication"
 	"io"
 	"net/http"
 )

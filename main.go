@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/s5364733/distrBoltX/api"
 	"github.com/s5364733/distrBoltX/config"
-	"github.com/s5364733/distrBoltX/db"
-	"github.com/s5364733/distrBoltX/replication"
-	rpc "github.com/s5364733/distrBoltX/rpc/proto"
-	"github.com/s5364733/distrBoltX/rpc/serv"
-	"github.com/s5364733/distrBoltX/web"
+	"github.com/s5364733/distrBoltX/internal/db"
+	"github.com/s5364733/distrBoltX/internal/rpc/serv"
+	"github.com/s5364733/distrBoltX/internal/web"
+	"github.com/s5364733/distrBoltX/pkg/replication"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -99,7 +99,7 @@ func registerGrpcPort(server *web.Server, grpcAddr string) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	rpc.RegisterAckSyncDialerServer(s, serv.NewAckSyncDialerService(server))
+	api.RegisterAckSyncDialerServer(s, serv.NewAckSyncDialerService(server))
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

@@ -3,6 +3,8 @@ package web
 import (
 	"bytes"
 	"fmt"
+	"github.com/s5364733/distrBoltX/config"
+	"github.com/s5364733/distrBoltX/internal/db"
 	"io"
 
 	"log"
@@ -11,10 +13,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/s5364733/distrBoltX/config"
-
-	"github.com/s5364733/distrBoltX/db"
 )
 
 func createShardDb(t *testing.T, idx int) *db.Database {
